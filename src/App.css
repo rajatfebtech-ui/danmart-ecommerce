@@ -1,0 +1,68 @@
+/* src/App.css */
+body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: sans-serif;
+}
+
+.header {
+  background-color: black;
+}
+
+.header a {
+  color: white;
+}
+
+.header svg {
+  cursor: pointer;
+}
+
+.banner img {
+  width: 100%;
+}
+
+.categories {
+  background-color: #f3f3f3;
+}
+
+.product-card {
+  width: 100%;
+  max-width: 380px; /* Adjust based on your design */
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #fff;
+  text-align: center;
+}
+
+.product-card img {
+  width: 100%;
+  height: 300px;
+  object-fit: cover; /* Ensures image covers the area without stretching */
+}
+
+
+
+.slider-custom {
+  padding: 0 20px; /* Adjust padding as needed */
+}
+
+.slider-custom .slick-slide {
+  margin: 0 10px; /* Adjust space between slides */
+}
+
+.slider-custom .slick-list {
+  overflow: hidden; /* Ensure no horizontal scroll */
+}
+
+.slide-item img {
+  padding: 10px; /* Add padding to images if needed */
+}
+
+
+@media (max-width: 500px) {
+  .product-card {
+    width:350px;
+  }
+}
