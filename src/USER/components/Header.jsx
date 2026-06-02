@@ -15,8 +15,6 @@ const Header = () => {
           </div>
           <div className="flex items-center gap-3">
             <Link to="/track" className="hover:text-amber-400 transition-colors">Track Order</Link>
-            <span className="text-slate-700">|</span>
-            <Link to="/admin" className="hover:text-amber-400 transition-colors">Admin Panel</Link>
           </div>
         </div>
       </div>

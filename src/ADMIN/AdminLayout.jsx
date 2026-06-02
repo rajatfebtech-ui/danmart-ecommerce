@@ -3,13 +3,16 @@ import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import {
   FiGrid, FiPackage, FiTag, FiShoppingBag, FiUsers,
-  FiLogOut, FiMenu, FiX, FiExternalLink,
+  FiLogOut, FiMenu, FiX, FiExternalLink, FiImage, FiStar, FiZap,
 } from "react-icons/fi";
 
 const nav = [
   { to: "/admin", label: "Dashboard", icon: FiGrid, end: true },
   { to: "/admin/products", label: "Products", icon: FiPackage },
+  { to: "/admin/featured", label: "Featured", icon: FiStar },
+  { to: "/admin/new-arrivals", label: "New Arrivals", icon: FiZap },
   { to: "/admin/categories", label: "Categories", icon: FiTag },
+  { to: "/admin/banners", label: "Banners", icon: FiImage },
   { to: "/admin/orders", label: "Orders", icon: FiShoppingBag },
   { to: "/admin/users", label: "Users", icon: FiUsers },
 ];

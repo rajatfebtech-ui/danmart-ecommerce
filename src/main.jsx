@@ -37,6 +37,8 @@ import CategoriesList from "./ADMIN/pages/categories/CategoriesList.jsx";
 import OrdersList from "./ADMIN/pages/orders/OrdersList.jsx";
 import OrderDetail from "./ADMIN/pages/orders/OrderDetail.jsx";
 import UsersList from "./ADMIN/pages/users/UsersList.jsx";
+import BannersList from "./ADMIN/pages/banners/BannersList.jsx";
+import { FeaturedProductsManager, NewArrivalsManager } from "./ADMIN/pages/products/FeaturedManager.jsx";
 import AdminProtectedRoute from "./ADMIN/routes/AdminProtectedRoute.jsx";
 
 const router = createBrowserRouter([
@@ -79,6 +81,9 @@ const router = createBrowserRouter([
       { path: "orders", element: <OrdersList /> },
       { path: "orders/:id", element: <OrderDetail /> },
       { path: "users", element: <UsersList /> },
+      { path: "banners", element: <BannersList /> },
+      { path: "featured", element: <FeaturedProductsManager /> },
+      { path: "new-arrivals", element: <NewArrivalsManager /> },
     ],
   },
 ]);

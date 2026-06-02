@@ -90,6 +90,13 @@ next_cart_id = [1]
 next_order_id = [1001]
 next_product_id = [7]
 next_category_id = [5]
+next_banner_id = [4]
+
+BANNERS = [
+    {"id": 1, "image": "slider1.jpg",  "title": "Discover Rare Antiques",    "desc": "Authentic collectibles curated from around the world",      "cta": "Shop Now", "href": "/category/1/antiques"},
+    {"id": 2, "image": "banner.jpeg",  "title": "Navigation Instruments",    "desc": "Precision compasses and telescopes for the explorer in you", "cta": "Explore",  "href": "/category/2/navigation"},
+    {"id": 3, "image": "banner2.jpg",  "title": "New Arrivals Weekly",       "desc": "Be the first to own the latest additions to our collection", "cta": "View New", "href": "/feature-products"},
+]
 
 ADMIN_USER = {"email": "admin@danmart.com", "password": "admin123"}
 
@@ -282,6 +289,10 @@ class Handler(BaseHTTPRequestHandler):
                            "total": i["quantity"] * i["product"]["price"]} for i in order["items"] if i.get("product")],
             })
 
+        # ── Banners (public) ──────────────────────────────────────────────────
+        elif method == "GET" and norm == "/banners":
+            self._ok(BANNERS)
+
         # ── Quotations ────────────────────────────────────────────────────────
         elif method == "POST" and norm == "/quotations":
             self._ok({"id": int(time.time())}, "Quotation submitted")
@@ -404,6 +415,43 @@ class Handler(BaseHTTPRequestHandler):
                 if not order: self._fail("Not found", 404); return
                 order["status"] = body.get("status", order.get("status"))
                 self._ok(order, "Status updated"); return
+
+        # Admin banners CRUD
+        if norm == "/banners":
+            if method == "GET":
+                self._ok(BANNERS); return
+            if method == "POST":
+                bid = next_banner_id[0]; next_banner_id[0] += 1
+                b = {"id": bid, **body}
+                BANNERS.append(b)
+                self._ok(b, "Banner created"); return
+
+        if len(parts) == 2 and parts[0] == "banners":
+            bid = int(parts[1])
+            banner = next((b for b in BANNERS if b["id"] == bid), None)
+            if method == "PUT":
+                if not banner: self._fail("Not found", 404); return
+                banner.update(body); self._ok(banner, "Updated"); return
+            if method == "DELETE":
+                idx = next((i for i, b in enumerate(BANNERS) if b["id"] == bid), None)
+                if idx is None: self._fail("Not found", 404); return
+                BANNERS.pop(idx); self._ok(None, "Deleted"); return
+
+        # Image upload — save base64 to public dir
+        if norm == "/upload-image" and method == "POST":
+            import base64 as b64mod
+            filename = body.get("filename", f"upload_{int(time.time())}.jpg")
+            data = body.get("data", "")
+            # Strip data URL prefix if present
+            if "," in data:
+                data = data.split(",", 1)[1]
+            try:
+                filepath = os.path.join(PUBLIC_DIR, filename)
+                with open(filepath, "wb") as f:
+                    f.write(b64mod.b64decode(data))
+                self._ok({"filename": filename}, "Image uploaded"); return
+            except Exception as e:
+                self._fail(f"Upload failed: {e}"); return
 
         # Admin users
         if norm == "/users" and method == "GET":
