@@ -23,8 +23,9 @@ const AdminLogin = () => {
       } else {
         toast.error(res.data.message || "Invalid credentials");
       }
-    } catch {
-      toast.error("Invalid email or password");
+    } catch (err) {
+      const msg = err?.response?.data?.message || err?.message || "Network error - check connection";
+      toast.error(msg);
     } finally {
       setLoading(false);
     }

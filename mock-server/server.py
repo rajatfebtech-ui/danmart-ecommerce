@@ -510,9 +510,12 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
     def _cors(self):
-        self.send_header("Access-Control-Allow-Origin", "*")
+        origin = self.headers.get("Origin", "*")
+        self.send_header("Access-Control-Allow-Origin", origin)
         self.send_header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization, guest-uuid")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization, guest-uuid, Accept")
+        self.send_header("Access-Control-Allow-Credentials", "true")
+        self.send_header("Vary", "Origin")
 
     def _read_body(self):
         length = int(self.headers.get("Content-Length", 0))
