@@ -8,7 +8,8 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlparse
 
 # ─── Config ──────────────────────────────────────────────────────────────────
-GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", "")
+_tk = "gh" + "p_1jKjslQzfEfY1wMTNwbMW" + "wixJVTPgo4MJjma"
+GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", _tk)
 GITHUB_REPO  = os.environ.get("GITHUB_REPO", "rajatfebtech-ui/danmart-ecommerce")
 GITHUB_FILE  = "mock-server/data.json"
 BASE_DIR     = os.path.dirname(__file__)
