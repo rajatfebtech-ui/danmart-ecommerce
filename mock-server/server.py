@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 """DanMart Mock API — pure Python 3, no pip needed.
-   Uses a GitHub Gist as persistent storage so data survives Render restarts.
-   Set env vars GIST_ID and GIST_TOKEN to enable persistence.
-   Falls back to in-memory if not configured.
+   Uses GitHub repo file as persistent storage so data survives Render restarts.
 """
 
 import json, os, time, base64 as b64mod, urllib.request, urllib.error
@@ -10,12 +8,13 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlparse
 
 # ─── Config ──────────────────────────────────────────────────────────────────
-GIST_ID    = os.environ.get("GIST_ID", "")
-GIST_TOKEN = os.environ.get("GIST_TOKEN", "")
-GIST_FILE  = "danmart_data.json"
-BASE_DIR   = os.path.dirname(__file__)
-PUBLIC_DIR = os.path.join(BASE_DIR, "..", "public")
-DATA_FILE  = os.path.join(BASE_DIR, "data.json")
+GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", "")
+GITHUB_REPO  = os.environ.get("GITHUB_REPO", "rajatfebtech-ui/danmart-ecommerce")
+GITHUB_FILE  = "mock-server/data.json"
+BASE_DIR     = os.path.dirname(__file__)
+PUBLIC_DIR   = os.path.join(BASE_DIR, "..", "public")
+DATA_FILE    = os.path.join(BASE_DIR, "data.json")
+_file_sha    = [None]   # GitHub requires SHA to update a file
 
 MIME = {".jpg":"image/jpeg",".jpeg":"image/jpeg",".png":"image/png",
         ".webp":"image/webp",".svg":"image/svg+xml",".gif":"image/gif"}
@@ -48,35 +47,44 @@ SEED = {
     "next_product_id":7,"next_category_id":5,"next_banner_id":4,"next_order_id":1001,
 }
 
-# ─── Gist persistence ─────────────────────────────────────────────────────────
-def _gist_headers():
-    return {"Authorization": f"token {GIST_TOKEN}", "Content-Type": "application/json", "User-Agent": "danmart-server"}
+# ─── GitHub repo persistence ──────────────────────────────────────────────────
+def _gh_headers():
+    return {"Authorization": f"token {GITHUB_TOKEN}", "Content-Type": "application/json", "User-Agent": "danmart-server"}
 
-def load_from_gist():
-    if not GIST_ID or not GIST_TOKEN:
+def load_from_github():
+    if not GITHUB_TOKEN:
         return None
     try:
-        req = urllib.request.Request(f"https://api.github.com/gists/{GIST_ID}", headers=_gist_headers())
+        url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{GITHUB_FILE}"
+        req = urllib.request.Request(url, headers=_gh_headers())
         with urllib.request.urlopen(req, timeout=10) as r:
-            gist = json.loads(r.read())
-        content = gist["files"].get(GIST_FILE, {}).get("content", "")
-        if content:
-            print("  [gist] Loaded data from GitHub Gist")
-            return json.loads(content)
+            resp = json.loads(r.read())
+        _file_sha[0] = resp.get("sha")
+        content = b64mod.b64decode(resp["content"]).decode()
+        data = json.loads(content) if content.strip() and content.strip() != "{}" else None
+        if data:
+            print("  [github] Loaded data from GitHub repo")
+            return data
     except Exception as e:
-        print(f"  [gist] Load failed: {e}")
+        print(f"  [github] Load failed: {e}")
     return None
 
-def save_to_gist(data):
-    if not GIST_ID or not GIST_TOKEN:
+def save_to_github(data):
+    if not GITHUB_TOKEN:
         return
     try:
-        payload = json.dumps({"files": {GIST_FILE: {"content": json.dumps(data)}}}).encode()
-        req = urllib.request.Request(f"https://api.github.com/gists/{GIST_ID}",
-                                     data=payload, headers=_gist_headers(), method="PATCH")
-        urllib.request.urlopen(req, timeout=10)
+        content = b64mod.b64encode(json.dumps(data).encode()).decode()
+        payload = {"message": "update data", "content": content}
+        if _file_sha[0]:
+            payload["sha"] = _file_sha[0]
+        payload_bytes = json.dumps(payload).encode()
+        url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{GITHUB_FILE}"
+        req = urllib.request.Request(url, data=payload_bytes, headers=_gh_headers(), method="PUT")
+        with urllib.request.urlopen(req, timeout=10) as r:
+            resp = json.loads(r.read())
+            _file_sha[0] = resp.get("content", {}).get("sha", _file_sha[0])
     except Exception as e:
-        print(f"  [gist] Save failed: {e}")
+        print(f"  [github] Save failed: {e}")
 
 # ─── Local file fallback ──────────────────────────────────────────────────────
 def load_from_file():
@@ -96,9 +104,8 @@ def save_to_file(data):
 
 # ─── DB load/save ─────────────────────────────────────────────────────────────
 def load_data():
-    d = load_from_gist() or load_from_file()
+    d = load_from_github() or load_from_file()
     if d:
-        # Ensure all seed keys exist (for upgrades)
         for k, v in SEED.items():
             if k not in d:
                 d[k] = v
@@ -109,7 +116,7 @@ def load_data():
 
 def save_data(data):
     save_to_file(data)
-    save_to_gist(data)
+    save_to_github(data)
 
 DB = load_data()
 
@@ -411,6 +418,6 @@ class Handler(BaseHTTPRequestHandler):
 if __name__ == "__main__":
     port=int(os.environ.get("PORT",3001))
     print(f"\n  DanMart API  →  http://0.0.0.0:{port}")
-    print(f"  Gist ID      →  {GIST_ID or 'NOT SET (in-memory only)'}")
+    print(f"  GitHub repo  →  {GITHUB_REPO} ({'token set' if GITHUB_TOKEN else 'NO TOKEN - in-memory only'})")
     print("  Admin login  →  admin@danmart.com / admin123\n")
     HTTPServer(("0.0.0.0",port),Handler).serve_forever()

@@ -23,8 +23,8 @@ const Banner = () => {
   }, []);
 
   const settings = {
-    dots: true, infinite: true, speed: 600, slidesToShow: 1,
-    slidesToScroll: 1, autoplay: true, autoplaySpeed: 4000,
+    dots: true, infinite: true, speed: 800, slidesToShow: 1,
+    slidesToScroll: 1, autoplay: true, autoplaySpeed: 3000,
     fade: true, cssEase: 'ease-in-out', arrows: false,
   };
 
@@ -43,7 +43,8 @@ const Banner = () => {
               <img
                 src={imgSrc(slide.image)}
                 alt={slide.title}
-                className="w-full h-[300px] md:h-[520px] object-cover"
+                className="w-full h-[220px] sm:h-[360px] md:h-[520px] object-cover object-center"
+                style={{ aspectRatio: "1920/520" }}
                 onError={(e) => { e.target.src = '/banner.jpeg'; }}
               />
               <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent flex flex-col items-start justify-center text-white px-8 md:px-20">
