@@ -102,7 +102,7 @@
       "images": [
         "product3.jpg"
       ],
-      "description": "A stunning decorative globe compass.",
+      "description": "A stunning decorative globe compass \u2014 perfect for home or office.",
       "is_active": true,
       "is_new": true,
       "is_top": false
@@ -124,7 +124,7 @@
         "product4.jpg",
         "product5.jpg"
       ],
-      "description": "Compact pocket sundial compass.",
+      "description": "Compact pocket sundial compass \u2014 stylish for everyday carry.",
       "is_active": true,
       "is_new": false,
       "is_top": true
